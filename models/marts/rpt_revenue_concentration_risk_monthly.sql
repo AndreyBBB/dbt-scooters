@@ -28,15 +28,15 @@ select
     rm.revenue_max,
     t.top_5_pct_revenue_rub,
     round(
-        rm.revenue_95 / nullif(rm.revenue_median, 0),
+        (rm.revenue_95 / nullif(rm.revenue_median, 0))::numeric,
         4
     ) as revenue_95_to_median_ratio,
     round(
-        t.top_5_pct_revenue_rub / nullif(rm.revenue_total, 0),
+        (t.top_5_pct_revenue_rub / nullif(rm.revenue_total, 0))::numeric,
         4
     ) as top_5_pct_revenue_share,
     round(
-        rm.revenue_total / nullif(rm.users, 0),
+        (rm.revenue_total / nullif(rm.users, 0))::numeric,
         2
     ) as revenue_per_paying_user_rub
 from {{ ref("fct_revenue_monthly") }} as rm

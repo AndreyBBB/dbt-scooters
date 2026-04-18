@@ -35,14 +35,14 @@ select
     sb.model,
     sb.scooters,
     sb.trips_count,
-    round(sb.trips_per_scooter, 2) as trips_per_scooter,
-    round(sb.total_distance_km, 2) as total_distance_km,
-    round(sb.distance_km_per_scooter, 2) as distance_km_per_scooter,
-    round(sb.avg_trip_distance_km, 2) as avg_trip_distance_km,
-    round(sb.avg_trip_duration_min, 2) as avg_trip_duration_min,
+    round(sb.trips_per_scooter::numeric, 2) as trips_per_scooter,
+    round(sb.total_distance_km::numeric, 2) as total_distance_km,
+    round(sb.distance_km_per_scooter::numeric, 2) as distance_km_per_scooter,
+    round(sb.avg_trip_distance_km::numeric, 2) as avg_trip_distance_km,
+    round(sb.avg_trip_duration_min::numeric, 2) as avg_trip_duration_min,
     sb.active_days,
     p.service_code,
     p.interval_km,
-    round(sb.distance_km_per_scooter / nullif(p.interval_km, 0), 2) as maintenance_cycle_utilization
+    round((sb.distance_km_per_scooter / nullif(p.interval_km, 0))::numeric, 2) as maintenance_cycle_utilization
 from stress_base as sb
 cross join policies as p
