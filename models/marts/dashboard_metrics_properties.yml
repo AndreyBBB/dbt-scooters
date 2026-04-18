@@ -1,0 +1,43 @@
+version: 2
+
+models:
+  - name: "rpt_geo_demand_supply_imbalance"
+    description: >
+      Tableau-ready geospatial metric by 500m hexagon showing where demand
+      removes scooters faster than supply returns them.
+    columns:
+      - name: "geom"
+        description: "Hexagon geometry in EPSG:4326"
+      - name: "start_trips"
+        description: "Trips starting inside the hexagon"
+      - name: "finish_trips"
+        description: "Trips finishing inside the hexagon"
+      - name: "net_outflow_trips"
+        description: "Positive means scooters leave the area more than they arrive"
+      - name: "imbalance_index"
+        description: "Normalized demand-supply imbalance from -1 to 1"
+
+  - name: "rpt_commuter_opportunity_segments"
+    description: >
+      Audience segmentation for marketing, combining user class, age, sex,
+      trip behavior, and average paid revenue.
+
+  - name: "rpt_revenue_concentration_risk_monthly"
+    description: >
+      Monthly revenue quality view showing whether growth is broad-based
+      or concentrated among a small power-user segment.
+
+  - name: "rpt_free_ride_dependency_monthly"
+    description: >
+      Monthly behavioral view by sex and age group showing how much
+      engagement depends on free trips.
+
+  - name: "rpt_fleet_stress_company_model"
+    description: >
+      Operations-focused fleet utilization view by company and model,
+      enriched with preventive maintenance cadence benchmarks.
+
+  - name: "rpt_geo_demand_supply_imbalance_tableau"
+    description: >
+      Tableau-friendly export of geospatial imbalance data using centroid
+      latitude and longitude instead of PostGIS geometry.

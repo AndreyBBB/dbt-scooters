@@ -1,0 +1,48 @@
+version: 2
+
+exposures:
+  - name: "technician_operations_dashboard"
+    label: "Technician Operations Dashboard"
+    type: "dashboard"
+    maturity: "medium"
+    description: >
+      Tableau Public dashboard for field operations and technicians.
+      Focuses on fleet stress, rebalancing priorities, and geospatial
+      demand-supply imbalance.
+    depends_on:
+      - "ref('rpt_geo_demand_supply_imbalance_tableau')"
+      - "ref('rpt_fleet_stress_company_model')"
+      - "ref('fct_trips_daily')"
+    owner:
+      name: "Operations / Technicians"
+
+  - name: "marketing_segment_dashboard"
+    label: "Marketing Segment Dashboard"
+    type: "dashboard"
+    maturity: "medium"
+    description: >
+      Tableau Public dashboard for marketing and growth analysis.
+      Focuses on commuter opportunity, free-ride dependency,
+      and booking retention.
+    depends_on:
+      - "ref('rpt_commuter_opportunity_segments')"
+      - "ref('rpt_free_ride_dependency_monthly')"
+      - "ref('rpt_book_scooter_retention')"
+    owner:
+      name: "Marketing / Growth"
+
+  - name: "board_growth_dashboard"
+    label: "Board Growth Dashboard"
+    type: "dashboard"
+    maturity: "medium"
+    description: >
+      Tableau Public dashboard for executive and board-level review.
+      Focuses on growth quality, revenue concentration risk,
+      and fleet usage efficiency.
+    depends_on:
+      - "ref('fct_revenue_monthly')"
+      - "ref('fct_user_revenue_monthly')"
+      - "ref('rpt_revenue_concentration_risk_monthly')"
+      - "ref('rpt_company_fleet_usage')"
+    owner:
+      name: "Board / Executive Team"

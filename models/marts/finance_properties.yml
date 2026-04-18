@@ -1,0 +1,84 @@
+version: 2
+
+models:
+  - name: "fct_revenue_daily"
+    description: "Summary daily revenue"
+    config:
+      schema: "finance"
+      grants:
+        select: [ "finance" ]
+      materialized: "incremental"
+      strategy: "merge"
+      unique_key: [ "date" ]
+      on_schema_change: "append_new_columns"
+      full_refresh: false
+      contract:
+        enforced: true
+    columns:
+    - name: "revenue_rub"
+      description: "Daily revenue in rubles"
+      data_type: "decimal(20, 2)"
+    - name: "date"
+      description: "Unique day"
+      data_type: "date"
+    - name: "updated_at"
+      description: "When row was updated last time"
+      data_type: "timestamptz"
+
+  - name: "rpt_revenue_daily_stats"
+    description: "Overall daily revenue statistics"
+    config:
+      schema: "finance"
+      grants:
+        select: [ "finance" ]
+
+  - name: "fct_user_revenue_monthly"
+    description: "Monthly total revenue by user (ignoring free trips)"
+    config:
+      schema: "finance"
+      grants:
+        select: [ "finance" ]
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "user_id", "month" ]
+
+  - name: "fct_revenue_monthly"
+    description: "Monthly total revenue (ignoring free trips)"
+    config:
+      schema: "finance"
+      grants:
+        select: [ "finance" ]
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "month" ]
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "not(users < 1000 or revenue_median < 500)"
+
+  - name: "rpt_revenue_monthly_report"
+    description: "Monthly revenue report"
+    config:
+      schema: "finance"
+      grants:
+        select: [ "finance" ]
+      materialized: "incremental"
+      strategy: "append"
+      on_schema_change: "append_new_columns"
+      full_refresh: false
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "month" ]
+
+exposures:
+  - name: "financial_dashboard"
+    label: "Financial Dashboard"
+    type: "dashboard"
+    maturity: "high"
+    description: "Main financial dashboard on company with code financial metrics"
+    depends_on:
+      - "ref('fct_revenue_daily')"
+    owner:
+      name: "Finance department"

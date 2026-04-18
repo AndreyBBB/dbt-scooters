@@ -1,0 +1,106 @@
+version: 2
+
+sources:
+  - name: "scooters_raw"
+    description: "Raw data provided by scooters service"
+    loader: "https://t.me/inzhenerka_dbt_bot"
+    tables:
+      - name: "trips"
+        description: "Scooter trips"
+        loaded_at_field: "finished_at"
+        freshness:
+          warn_after:
+            count: 1
+            period: "day"
+          error_after:
+            count: 3650
+            period: "day"
+        columns:
+          - name: "user_id"
+            description: "User identifier"
+            data_tests:
+              - not_null
+              - relationships:
+                  arguments:
+                    name: "every_trip_has_user"
+                    to: "source('scooters_raw', 'users')"
+                    field: "id"
+
+      - name: "users"
+        description: "Users of scooter service"
+        columns:
+          - name: "sex"
+            description: "User gender"
+            data_tests:
+              - accepted_values:
+                  arguments:
+                    values: [ "M", "F" ]
+              - not_null:
+                  config:
+                    severity: "warn"
+
+      - name: "events"
+        description: "Raw user events with duplicates"
+
+models:
+  - name: "stg_trips"
+    description: "Trips prepared for analysis"
+    config:
+      materialized: "view"
+    data_tests:
+      - row_count_equal:
+          arguments:
+            compare_model: "source('scooters_raw', 'trips')"
+
+  - name: "stg_events"
+    description: "User events prepared for following processing"
+    config:
+      materialized: "view"
+      event_time: "timestamp"
+    columns:
+      - name: "date"
+        description: |
+          Date of event derived from timestamp.
+          Imitates Hive-styled partitioning of events by date.
+          It is needed for efficient incremental processing by engines
+          with partitioning support (i.e. Trino).
+
+  - name: "stg_events_deduped"
+    description: "User events without duplicates"
+    config:
+      materialized: "incremental"
+      incremental_strategy: "merge"
+      unique_key: [ "user_id", "timestamp", "type_id" ]
+
+  - name: "stg_events_deduped_v2"
+    description: "User events without duplicates"
+    config:
+      materialized: "incremental"
+      incremental_strategy: "merge"
+      unique_key: [ "user_id", "timestamp", "type_id" ]
+      meta:
+        owner: "Igor Dushnin"
+        incrementality:
+          start_date: "2023-06-01"
+          days_max: 60
+
+  - name: "stg_events_enriched"
+    description: "User events enriched with meaningful types"
+    config:
+      materialized: "view"
+      meta:
+        unique_key: [ "user_id", "timestamp", "type_id" ]
+        testing:
+          days_max: 60
+    data_tests: [ "unique_key_meta" ]
+
+  - name: "stg_users"
+    description: "Users prepared for analysis without sensitive data"
+    config:
+      materialized: "view"
+
+  - name: "stg_battery_state"
+    description: "Fake simulated data of scooter batteries state in time"
+    config:
+      materialized: "table"
+      event_time: "event_ts"

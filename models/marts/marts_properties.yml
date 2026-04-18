@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: "rpt_trips_overview"
+    description: "Overall trips statistics"
+
+  - name: "fct_trips_daily"
+    description: "Overall trips statistics per day"
+    config:
+      indexes:
+        - columns: ["date"]
+
+  - name: "fct_trips_by_age_daily"
+    description: "Daily trips statistics by user age"
+    data_tests:
+      - unique:
+          arguments:
+            column_name: "date::text || age::text"
+      - unique_key:
+          arguments:
+            columns: [ "date", "age" ]
+
+  - name: "rpt_trips_by_age_daily"
+    description: "Aggregation of daily trips statistics by user age"
+
+  - name: "rpt_trips_by_age_group"
+    description: "Overall trips statistics by user age group"
+
+  - name: "rpt_parking_start_hex"
+    description: "Trip start parking statistics by 500 m hexagons"
+
+  - name: "rpt_parking_finish_hex"
+    description: "Trip finish parking statistics by 10 m hexagons"
+
+  - name: "fct_trips_concurrency"
+    description: "Number of simultaneous rides in time"
+    config:
+      materialized: "incremental"
+
+  - name: "rpt_company_fleet_usage"
+    description: "Trip satistics by company"
+    columns:
+      - name: "company"
+        description: "Scooters manufacturing company"
+        data_tests:
+          - unique
+
+  - name: "rpt_events_overview"
+    description: "Overall user events statistics"
+
+  - name: "rpt_trips_age_sex_pivot"
+    description: "Trips per age grouped by sex"
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "age" ]
+      - dbt_expectations.expect_table_column_count_to_equal:
+          arguments:
+            value: 3
+    columns:
+      - name: "age"
+        description: "Numerical age of user"
+        data_tests:
+          - "dbt_utils.not_constant"
+
+  - name: "rpt_book_scooter_retention"
+    description: >
+      Retention analysis which tells how many people
+      started search for scooter and finally booked it on or after
+      1, 7, 14 days (or weeks, months, years), etc
+
+  - name: "time_spine_daily"
+    config:
+      materialized: "table"
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: "date_day"
+        granularity: day
+
+  - name: "rpt_user_class_stats"
+    description: >
+      Calculation of overall group statistics:
+        - number of users in each group
+        - total number of users for information and validation
+
+  - name: "fct_trips_by_age_sex_daily"
+    description: "Daily trips statistics by user age and gender"
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "date", "age", "sex" ]
+
+  - name: "fct_trips_by_age_sex_weekly"
+    description: "Weekly trips statistics by user age and gender"
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "week", "age", "sex" ]
+
+  - name: "fct_trips_by_age_sex_monthly"
+    description: "Monthly trips statistics by user age and gender"
+    data_tests:
+      - unique_key:
+          arguments:
+            columns: [ "month", "age", "sex" ]

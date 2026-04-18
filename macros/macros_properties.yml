@@ -1,0 +1,132 @@
+version: 2
+
+macros:
+  - name: "generate_schema_name"
+    description: |
+      Customize schema name generation using only provided name for some schemas.
+      dbt uses this macro automatically, there is no need to run it manually.
+    arguments:
+      - name: "custom_schema_name"
+        type: "string"
+        description: "Custom name of schema defined in project configuration"
+      - name: "node"
+        type: "node"
+        description: "dbt node to generate schema name for (not in use)"
+
+  - name: "updated_at"
+    description: "Columns which represents timestamp of the last update"
+
+  - name: "date_in_moscow"
+    description: "Convert timestamptz to date in Europe/Moscow time zone"
+    arguments:
+      - name: "ts_col"
+        type: "string"
+        description: "Timestamp column in timestamptz format"
+
+  - name: "trips_geom_stat"
+    description: "Count trips per hexagon of given size"
+    arguments:
+      - name: "trips_table"
+        type: "string"
+        description: "Trips table with geometry data"
+      - name: "geom_col"
+        type: "string"
+        description: "Column with geometry data"
+      - name: "grid"
+        type: "integer"
+        description: "Size of grid hexagon"
+
+  - name: "create_role"
+    description: "Create role for users as dbt operation"
+    arguments:
+      - name: "name"
+        type: "string"
+        description: "Role name"
+
+  - name: "select_first_value"
+    description: "Query database and get first value from first column of result"
+    arguments:
+      - name: "query"
+        type: "string"
+        description: "SQL query to get scalar value from database during compilation"
+
+  - name: "get_meta_value"
+    description: "Get meta value from model configuration"
+    arguments:
+      - name: "model"
+        type: "relation"
+        description: "dbt model from which to retrieve the meta value"
+      - name: "meta_key"
+        type: "string"
+        description: "Key from meta dictionary"
+      - name: "def_value"
+        type: "any"
+        description: "Default value if key not found"
+
+  - name: "incremental_date_condition"
+    description: |
+      Get incremental SQL condition by date column for incremental model.
+      Macro uses parameters from 'incrementality' dictionary declared as meta of model.
+      Arguments also can be specified as variables overriding meta configuration.
+    arguments:
+      - name: "model"
+        type: "relation"
+        description: "Incremental dbt model to fill with date condition"
+      - name: "date"
+        type: "string"
+        description: |
+          Particular date to compute.
+          If specified it overrides other parameters and arguments.
+          Format: 'YYYY-MM-DD'
+      - name: "date_start"
+        type: "string"
+        description: |
+          Start date for incremental run. First date of incremental batch.
+          Format: 'YYYY-MM-DD'
+      - name: "days_max"
+        type: "integer"
+        description: |
+          Max size of incremental batch in days.
+          Default: 30
+      - name: "days_back_from_today"
+        type: "integer"
+        description: |
+          Number of days to step back from current date for incremental batch.
+          Allows to do not process incomplete data for current or recent dates.
+          Default: 1
+
+  - name: "trips_age_sex_report"
+    description: "Compute trips statistics in time by age and gender of user"
+    arguments:
+      - name: "trips_table"
+        type: "string"
+        description: "Table with source trips data enriched with user data"
+      - name: "granularity"
+        type: "string"
+        description: "Time granularity for report (daily/weekly/monthly)"
+
+  - name: "get_relation_node"
+    description: "Get dbt node from graph by the relation object"
+    arguments:
+      - name: "relation"
+        type: "relation"
+        description: "dbt relation object (ref, source)"
+
+  - name: "microbatch_condition"
+    description: "Get customized microbatch SQL condition for incremental model"
+    arguments:
+      - name: "model"
+        type: "relation"
+        description: "Source dbt relation to get event_time columns from configuration"
+      - name: "event_time"
+        type: "string"
+        description: "Custom event_time column name to use for incremental filtering instead of model argument"
+      - name: "alias"
+        type: "string"
+        description: "Optional table alias to use for event_time column"
+      - name: "start_offset_days"
+        type: "integer"
+        description: "Number of days to offset begin time down from microbatch configuration"
+      - name: "end_offset_days"
+        type: "integer"
+        description: "Number of days to offset end time up from microbatch configuration"
